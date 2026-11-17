@@ -1,20 +1,200 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="description" content="Dismantle Collective — artists, events and merch." />
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link
-      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500&family=Noto+Sans+Mono:wght@400&family=Raleway:wght@400;500&family=Red+Hat+Display:wght@300;400;500;600&display=swap"
-      rel="stylesheet"
-    />
-    <title>Dismantle Collective</title>
-  </head>
-  <body>
-    <div id="root"></div>
-    <script type="module" src="/src/main.tsx"></script>
-  </body>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Dismantle Collective — artists, events and merch.">
+  <title>Dismantle Collective</title>
+  <link rel="icon" type="image/svg+xml" href="images/logo/mark.svg">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500&family=Noto+Sans+Mono:wght@400&family=Raleway:wght@400;500&family=Red+Hat+Display:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body class="page theme-dark">
+
+  <!-- Nav (home version: coloured blocks) -->
+  <header class="nav nav--blocks">
+    <nav class="nav__inner" aria-label="Main">
+      <div class="nav__group">
+        <a class="nav__link nav__link--red" href="artists.html">Artists</a>
+        <a class="nav__link nav__link--blue" href="about.html">About</a>
+      </div>
+      <a class="nav__home" href="index.html">
+        <img class="logo-mark on-dark" src="images/logo/mark.svg" alt="Dismantle Collective home">
+      </a>
+      <div class="nav__group nav__group--right">
+        <a class="nav__link nav__link--orange nav__link--end" href="shop.html">Shop</a>
+        <a class="nav__link nav__link--green nav__link--end" href="schedule.html">Schedule</a>
+      </div>
+    </nav>
+  </header>
+
+  <main>
+
+    <!-- Hero -->
+    <section class="hero">
+      <h1 class="hero__logo">
+        <img class="logo-full on-dark" src="images/logo/logo.svg" alt="Dismantle">
+      </h1>
+      <div class="hero__row">
+        <a class="hero-card accent-red" href="schedule.html">
+          <span class="hero-card__label">Upcoming event/news</span>
+          <span class="hero-card__title">DISMANTLE<br>X AMITY</span>
+          <span class="corner corner--sm">
+            <svg class="arrow" viewBox="0 0 16 16" aria-hidden="true"><path d="M4 12 12 4M5.5 4H12v6.5"/></svg>
+          </span>
+        </a>
+        <div class="hero__social">
+          <a href="https://www.instagram.com/" target="_blank" rel="noreferrer" aria-label="Instagram">
+            <img class="icon on-dark" src="images/icons/instagram.svg" alt="">
+          </a>
+          <a href="mailto:hello@dismantle-collective.com" aria-label="Email us">
+            <img class="icon icon-email on-dark" src="images/icons/email.svg" alt="">
+          </a>
+        </div>
+        <a class="hero-card accent-green" href="shop.html">
+          <span class="hero-card__label">Upcoming event/news</span>
+          <span class="hero-card__title">NEW IN<br>SHOP</span>
+          <span class="corner corner--sm">
+            <svg class="arrow" viewBox="0 0 16 16" aria-hidden="true"><path d="M4 12 12 4M5.5 4H12v6.5"/></svg>
+          </span>
+        </a>
+      </div>
+    </section>
+
+    <!-- Recent happenings -->
+    <section class="happenings">
+      <h2 class="happenings__title">RECENT HAPPENINGS</h2>
+      <div class="happenings__grid">
+        <a class="happening accent-orange" href="#">
+          <img class="happening__img" src="images/happening-lasers.webp" alt="">
+          <span class="corner corner--lg"></span>
+          <h3 class="happening__title"><span>MALINE GENIE</span><span>UNLEASHES NEW SET</span></h3>
+        </a>
+        <a class="happening accent-green" href="#">
+          <img class="happening__img" src="images/happening-dj.webp" alt="">
+          <span class="corner corner--lg"></span>
+          <h3 class="happening__title">NEWS #2</h3>
+        </a>
+        <a class="happening accent-blue" href="#">
+          <img class="happening__img" src="images/happening-graffiti.webp" alt="">
+          <span class="corner corner--lg"></span>
+          <h3 class="happening__title">NEWS #3</h3>
+        </a>
+      </div>
+    </section>
+
+    <!-- Representing: hovering a name highlights it and shows that artist's image
+         (data-image on each link; see js/main.js) -->
+    <section class="representing">
+      <h2 class="representing__title">Representing</h2>
+      <div class="representing__body">
+        <ul class="representing__list">
+          <li><a class="representing__name" href="artists.html#bobby" data-image="images/artwork-placeholder.webp">BOBBY</a></li>
+          <li><a class="representing__name is-active" href="artists.html#bruno-schmidt" data-image="images/artwork-placeholder.webp">Bruno Schmidt</a></li>
+          <li><a class="representing__name" href="artists.html#car" data-image="images/artwork-placeholder.webp">C.A.R</a></li>
+          <li><a class="representing__name" href="artists.html#fits-wentink" data-image="images/artwork-placeholder.webp">Fits Wentink</a></li>
+          <li><a class="representing__name" href="artists.html#luca-lozano" data-image="images/artwork-placeholder.webp">Luca Lozano</a></li>
+          <li><a class="representing__name" href="artists.html#malin-genie" data-image="images/artwork-placeholder.webp">Malin Genie</a></li>
+          <li><a class="representing__name" href="artists.html#red" data-image="images/artwork-placeholder.webp">R.E.D</a></li>
+          <li><a class="representing__name" href="artists.html#sam-bangura" data-image="images/artwork-placeholder.webp">Sam Bangura</a></li>
+          <li><a class="representing__name" href="artists.html#samuel-deep" data-image="images/artwork-placeholder.webp">Samuel Deep</a></li>
+          <li><a class="representing__name" href="artists.html#terry-francis" data-image="images/artwork-placeholder.webp">Terry Francis</a></li>
+          <li><a class="representing__name" href="artists.html#unai-trotti" data-image="images/artwork-placeholder.webp">Unai Trotti</a></li>
+        </ul>
+        <figure class="representing__art">
+          <span class="px px--a"></span>
+          <span class="px px--b"></span>
+          <span class="px px--c"></span>
+          <span class="px px--d"></span>
+          <span class="px px--e"></span>
+          <span class="px px--f"></span>
+          <img id="representing-img" src="images/artwork-placeholder.webp" alt="Bruno Schmidt artwork">
+        </figure>
+      </div>
+    </section>
+
+    <!-- Events -->
+    <section class="home-events">
+      <article class="ticket ticket--featured accent-green">
+        <div class="ticket__main" style="background-image: url('images/event-crowd.webp')">
+          <time class="ticket__date" datetime="2026-11-21">21 November 2026</time>
+          <h3 class="ticket__title"><span>DISMANTLE</span><span>X AMITY</span></h3>
+          <p class="ticket__lineup">FRITS WENTINK | MALIN GENIE | R.E.D</p>
+        </div>
+        <div class="ticket__stub">
+          <a class="ticket__cta" href="#">Get<br>Tickets!
+            <svg class="arrow ticket__arrow" viewBox="0 0 16 16" aria-hidden="true"><path d="M4 12 12 4M5.5 4H12v6.5"/></svg>
+          </a>
+          <a class="ticket__ig" href="https://www.instagram.com/" target="_blank" rel="noreferrer" aria-label="Instagram">
+            <img class="icon" src="images/icons/instagram.svg" alt="">
+          </a>
+        </div>
+        <span class="ticket__notch ticket__notch--top"></span>
+        <span class="ticket__notch ticket__notch--bottom"></span>
+      </article>
+
+      <div class="home-events__row">
+        <article class="ticket ticket--compact accent-orange">
+          <div class="ticket__main" style="background-image: url('images/event-crowd.webp')">
+            <time class="ticket__date" datetime="2026-12-20">20 December 2026</time>
+            <h3 class="ticket__title"><span>EVENT</span><span>#2</span></h3>
+          </div>
+          <div class="ticket__stub">
+            <a class="ticket__cta" href="#">Get<br>Tickets!
+              <svg class="arrow ticket__arrow" viewBox="0 0 16 16" aria-hidden="true"><path d="M4 12 12 4M5.5 4H12v6.5"/></svg>
+            </a>
+          </div>
+          <span class="ticket__notch ticket__notch--top"></span>
+          <span class="ticket__notch ticket__notch--bottom"></span>
+        </article>
+
+        <article class="ticket ticket--compact accent-blue">
+          <div class="ticket__main" style="background-image: url('images/event-crowd.webp')">
+            <!-- Date as in the design; probably meant 2027 -->
+            <time class="ticket__date" datetime="2026-01-07">7 January 2026</time>
+            <h3 class="ticket__title"><span>EVENT</span><span>#3</span></h3>
+          </div>
+          <div class="ticket__stub">
+            <a class="ticket__cta" href="#">Get<br>Tickets!
+              <svg class="arrow ticket__arrow" viewBox="0 0 16 16" aria-hidden="true"><path d="M4 12 12 4M5.5 4H12v6.5"/></svg>
+            </a>
+          </div>
+          <span class="ticket__notch ticket__notch--top"></span>
+          <span class="ticket__notch ticket__notch--bottom"></span>
+        </article>
+
+        <a class="schedule-card" href="schedule.html">
+          <span class="schedule-card__title">FULL<br>SCHEDULE</span>
+          <svg class="arrow schedule-card__arrow" viewBox="0 0 16 16" aria-hidden="true"><path d="M4 12 12 4M5.5 4H12v6.5"/></svg>
+        </a>
+      </div>
+    </section>
+
+  </main>
+
+  <footer class="footer footer--cream">
+    <a class="footer__logo" href="index.html">
+      <img class="logo-type" src="images/logo/type.svg" alt="Dismantle">
+    </a>
+    <div class="footer__links">
+      <ul class="footer__col footer__col--site">
+        <li><a href="artists.html">Artists</a></li>
+        <li><a href="about.html">About</a></li>
+        <li><a href="shop.html">Shop</a></li>
+        <li><a href="schedule.html">Schedule</a></li>
+      </ul>
+      <ul class="footer__col">
+        <li><a href="#">Terms &amp; Conditions</a></li>
+        <li><a href="#">Privacy Policy</a></li>
+        <li><a href="#">Cookie Policy</a></li>
+        <li><a href="#">Legal Guarantee</a></li>
+      </ul>
+    </div>
+    <p class="footer__copy">Copyright © 2026 Dismantle Collective. All rights reserved.</p>
+  </footer>
+
+  <script src="js/main.js"></script>
+</body>
 </html>

@@ -1,5 +1,5 @@
 /* ==========================================================================
-   Dismantle Collective — global styles
+   Dismantle Collective — styles for all five pages
    Built against 1440px-wide desktop drafts. `--u` is one design pixel:
    1px at ≥1440px, shrinking proportionally below that (never under 0.55px).
    ========================================================================== */
@@ -84,18 +84,21 @@ img {
 .accent-blue { --accent: var(--c-blue); }
 .accent-green { --accent: var(--c-green); }
 
-/* Masked SVG assets (tinted with currentColor) ---------------------------- */
-.masked {
-  display: inline-block;
-  background-color: currentColor;
-  -webkit-mask: var(--mask) center / contain no-repeat;
-  mask: var(--mask) center / contain no-repeat;
-}
-
-.logo-full { aspect-ratio: 900 / 600; width: 100%; }
-.logo-type { aspect-ratio: 900 / 300; width: 100%; }
-.logo-mark { width: max(64px, calc(100 * var(--u))); aspect-ratio: 1; }
+/* Logos + icons (black SVGs; .on-dark turns them light grey) -------------- */
+.logo-full { width: 100%; height: auto; aspect-ratio: 900 / 600; }
+.logo-type { width: 100%; height: auto; aspect-ratio: 900 / 300; }
+.logo-mark { width: max(64px, calc(100 * var(--u))); height: auto; aspect-ratio: 1; }
 .icon { width: 1em; height: 1em; }
+.on-dark { filter: invert(0.89); }
+
+/* Small ↗ arrow (inline SVG) */
+.arrow {
+  width: 16px;
+  height: 16px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.6;
+}
 
 /* Page themes ------------------------------------------------------------- */
 .page {
@@ -262,6 +265,7 @@ img {
   justify-content: center;
   aspect-ratio: 1380 / 862;
   margin: calc(126 * var(--u)) var(--gutter) calc(64 * var(--u));
+  background-image: url('../images/swirl.webp');
   background-size: cover;
   background-position: center;
   color: var(--c-ink);
@@ -403,10 +407,9 @@ img {
 }
 .hero__social a {
   display: flex;
-  transition: color 0.15s ease;
+  transition: transform 0.15s ease;
 }
-.hero__social a:hover { color: var(--c-green); }
-.hero__social a:last-child:hover { color: var(--c-red); }
+.hero__social a:hover { transform: translateY(-3px) scale(1.06); }
 .hero__social .icon-email { width: 1.1em; }
 
 /* Recent happenings */
