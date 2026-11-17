@@ -24,6 +24,12 @@
 
   --gutter: max(16px, calc(30 * var(--u)));
   --gap: max(14px, calc(30 * var(--u)));
+
+  /* Background grain strength. Plain blending, because overlay and soft-light
+     leave fully saturated channels untouched, so the grain vanished on the
+     brand colours. The dark theme needs less (see .theme-dark). */
+  --noise-opacity: 0.14;
+  --noise-img: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
 }
 
 *,
@@ -107,11 +113,38 @@ img {
   color: var(--c-ink);
   min-height: 100vh;
 }
-.theme-dark { --bg: var(--c-night); color: var(--c-light); }
+.theme-dark { --bg: var(--c-night); color: var(--c-light); --noise-opacity: 0.07; }
 .theme-red { --bg: var(--c-red); }
 .theme-orange { --bg: var(--c-orange); }
 .theme-blue { --bg: var(--c-blue); }
 .theme-green { --bg: var(--c-green); }
+
+/* Grain behind all page content (sections with their own fill cover it).
+   Static on purpose: moving grain would compete with the hover debris. */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background: var(--noise-img) 0 0 / 180px 180px;
+  opacity: var(--noise-opacity);
+}
+
+/* ==========================================================================
+   Cube interactions (js/cubes.js)
+   ========================================================================== */
+/* Debris layer: behind all content, so it shows on the page background and
+   passes under buttons, cards and text. It is added at the end of <body>, so
+   it still paints above the grain (body::before), which shares this z-index. */
+.cube-fx {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
 
 /* ==========================================================================
    Nav
@@ -135,31 +168,10 @@ img {
 .nav__home {
   display: flex;
   justify-content: center;
-  transition: transform 0.2s ease;
-}
-.nav__home:hover {
-  transform: rotate(-8deg) scale(1.05);
 }
 
-/* Plain variant (inner pages) */
-.nav--plain .nav__link {
-  font-family: var(--f-display);
-  font-size: max(13px, calc(18 * var(--u)));
-  letter-spacing: -0.03em;
-  text-transform: uppercase;
-  min-width: calc(127 * var(--u));
-  text-underline-offset: 4px;
-}
-.nav--plain .nav__group--right .nav__link {
-  min-width: 0;
-  margin-left: calc(42 * var(--u));
-}
-.nav--plain .nav__link:hover {
-  text-decoration: underline;
-  text-decoration-thickness: 2px;
-}
-
-/* Block variant (home) */
+/* Block nav, used on every page. On inner pages the current page's block
+   matches the page colour and blends in (chosen on purpose). */
 .nav--blocks .nav__link {
   display: flex;
   align-items: center;
@@ -171,7 +183,6 @@ img {
   font-family: var(--f-mono);
   font-size: max(12px, calc(18 * var(--u)));
   text-transform: uppercase;
-  transition: transform 0.15s ease, box-shadow 0.15s ease;
 }
 .nav--blocks .nav__link--red { --accent: var(--c-red); }
 .nav--blocks .nav__link--blue { --accent: var(--c-blue); }
@@ -180,10 +191,6 @@ img {
 .nav--blocks .nav__link--end {
   justify-content: flex-end;
   padding-right: calc(12 * var(--u));
-}
-.nav--blocks .nav__link:hover {
-  transform: translate(-3px, -3px);
-  box-shadow: 3px 3px 0 var(--c-light);
 }
 
 /* ==========================================================================
@@ -407,9 +414,7 @@ img {
 }
 .hero__social a {
   display: flex;
-  transition: transform 0.15s ease;
 }
-.hero__social a:hover { transform: translateY(-3px) scale(1.06); }
 .hero__social .icon-email { width: 1.1em; }
 
 /* Recent happenings */
@@ -467,10 +472,18 @@ img {
   letter-spacing: -0.02em;
 }
 
-/* Representing */
+/* Representing
+   Each artist has one of the four brand colours, cycling down the list
+   (--rep). The active artist's colour is copied to the section as
+   --rep-accent by js/main.js, and paints the portrait border and pixels. */
 .representing {
+  --rep-accent: var(--c-blue);
   padding: calc(203 * var(--u)) 0 calc(110 * var(--u));
 }
+.representing__list li:nth-child(4n + 1) .representing__name { --rep: var(--c-red); }
+.representing__list li:nth-child(4n + 2) .representing__name { --rep: var(--c-blue); }
+.representing__list li:nth-child(4n + 3) .representing__name { --rep: var(--c-orange); }
+.representing__list li:nth-child(4n + 4) .representing__name { --rep: var(--c-green); }
 .representing__title {
   padding-right: calc(104 * var(--u));
   text-align: center;
@@ -499,6 +512,7 @@ img {
   line-height: calc(85 * var(--u));
   letter-spacing: 0;
   transition: color 0.15s ease;
+  --burst: var(--rep); /* hover debris in the artist's colour */
 }
 .representing__name::before {
   content: '';
@@ -510,7 +524,7 @@ img {
   height: calc(90 * var(--u));
   transform: translateY(-50%) scaleX(0);
   transform-origin: right;
-  background: var(--c-blue);
+  background: var(--rep);
   transition: transform 0.2s ease;
 }
 .representing__name.is-active {
@@ -537,18 +551,17 @@ img {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  border: calc(5 * var(--u)) solid var(--c-blue);
+  border: calc(5 * var(--u)) solid var(--rep-accent);
   background: var(--c-cream);
-  animation: art-in 0.35s ease;
 }
-@keyframes art-in {
-  from { opacity: 0.2; transform: translate(6px, -6px); }
-  to { opacity: 1; transform: none; }
-}
-/* Glitchy pixel "shadow" behind the artwork */
+/* Glitchy pixel "shadow" behind the artwork. On each artist change js/main.js
+   hides them (.is-off) and pops them back one by one, like the hover cubes. */
 .px {
   position: absolute;
-  background: var(--c-blue);
+  background: var(--rep-accent);
+}
+.px.is-off {
+  visibility: hidden;
 }
 .px--a { left: calc(508 * var(--u)); top: calc(52 * var(--u)); width: calc(40 * var(--u)); height: calc(232 * var(--u)); }
 .px--b { left: calc(508 * var(--u)); top: calc(440 * var(--u)); width: calc(40 * var(--u)); height: calc(219 * var(--u)); }
@@ -578,10 +591,6 @@ img {
   border-radius: calc(20 * var(--u));
   background: var(--c-red);
   color: var(--c-ink);
-  transition: transform 0.2s ease;
-}
-.schedule-card:hover {
-  transform: translateY(-4px);
 }
 .schedule-card__title {
   font-family: var(--f-display);
@@ -697,10 +706,6 @@ img {
   display: flex;
   align-self: flex-start;
   font-size: max(30px, calc(50 * var(--u)));
-  transition: transform 0.15s ease;
-}
-.ticket__ig:hover {
-  transform: scale(1.08);
 }
 
 .ticket__notch {
@@ -710,6 +715,15 @@ img {
   height: var(--notch);
   border-radius: 50%;
   background: var(--bg);
+}
+/* Same grain as the page, so the notch reads as a hole, not a flat dot */
+.ticket__notch::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: var(--noise-img) 0 0 / 180px 180px;
+  opacity: var(--noise-opacity);
 }
 .ticket__notch--top { top: calc(var(--notch) / -2); }
 .ticket__notch--bottom { bottom: calc(var(--notch) / -2); }
@@ -819,14 +833,6 @@ img {
   }
   .nav__group {
     gap: 8px;
-  }
-  .nav--plain .nav__link,
-  .nav--plain .nav__group--right .nav__link {
-    min-width: 0;
-    margin: 0;
-  }
-  .nav--plain .nav__group {
-    gap: 18px;
   }
   .nav--blocks .nav__link {
     width: auto;
