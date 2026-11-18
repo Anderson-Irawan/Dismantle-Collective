@@ -51,8 +51,11 @@
   const MAX_DEPTH = 2;
 
   // What a hover can land on, and what then reacts as one object.
-  const HOVER = 'a[href], button, [role="button"], summary, .ticket';
-  const OBJECT = '.ticket';
+  const HOVER = 'a[href], button, [role="button"], summary';
+  // No cubes on these, or on anything inside them. Logos tilt and social
+  // icons change colour instead (css/styles.css); tickets have none (removed
+  // on request).
+  const NO_CUBES = '.nav__home, .footer__logo, .hero__social a, .ticket';
 
   const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
   const clamp = (v, lo, hi) => Math.min(hi, Math.max(lo, v));
@@ -72,35 +75,69 @@
   let frame = 0;
   let dpr = 1;
 
+  // The canvas covers the visible page, which excludes the scrollbar. Sizing
+  // it from window.innerWidth (scrollbar included) stretched every drawing
+  // by the scrollbar's share, so debris drifted off objects further and
+  // further toward the right of the page.
+  const view = () => [document.documentElement.clientWidth, document.documentElement.clientHeight];
+
   function fitCanvas() {
     dpr = Math.min(2, window.devicePixelRatio || 1);
-    const w = Math.round(window.innerWidth * dpr);
-    const h = Math.round(window.innerHeight * dpr);
+    const [vw, vh] = view();
+    const w = Math.round(vw * dpr);
+    const h = Math.round(vh * dpr);
     if (canvas.width !== w || canvas.height !== h) {
       canvas.width = w;
       canvas.height = h;
     }
   }
 
+  // Cell index to on-screen position, for an object box and its grid. Cells
+  // across the object are stretched slightly so the grid meets both of its
+  // edges exactly.
+  function gridOf(rect, g) {
+    const { left: L, top: T, width: W, height: H } = rect;
+    return {
+      X: (i) => Math.round(i < 0 ? L + i * g.cell : i <= g.cols ? L + (i * W) / g.cols : L + W + (i - g.cols) * g.cell),
+      Y: (j) => Math.round(j < 0 ? T + j * g.cell : j <= g.rows ? T + (j * H) / g.rows : T + H + (j - g.rows) * g.cell),
+    };
+  }
+
   function draw(now) {
     fitCanvas();
-    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-    ctx.clearRect(0, 0, window.innerWidth, window.innerHeight);
-    const sx = window.scrollX;
-    const sy = window.scrollY;
-    pieces = pieces.filter((p) => now < p.dead);
+    const [vw, vh] = view();
+    ctx.setTransform(canvas.width / vw, 0, 0, canvas.height / vh, 0, 0);
+    ctx.clearRect(0, 0, vw, vh);
+    pieces = pieces.filter((p) => now < p.dead && p.g.obj.isConnected);
 
+    // Pieces are stored as grid cells of their object and placed from the
+    // object's live box every frame, so they stay stuck to it even if the
+    // page scrolls, resizes or reflows while they are up.
+    const grids = new Map();
     for (const p of pieces) {
       if (now < p.born) continue;
+      let grid = grids.get(p.g);
+      if (!grid) {
+        grid = gridOf(p.g.obj.getBoundingClientRect(), p.g);
+        grids.set(p.g, grid);
+      }
+      const { X, Y } = grid;
       // Pops in at full size, holds, then fades out evenly. No motion.
       ctx.globalAlpha = now <= p.fade ? 1 : 1 - (now - p.fade) / (p.dead - p.fade);
       ctx.fillStyle = p.color;
       if (p.dot) {
+        const cx = (X(p.i) + X(p.i + 1)) / 2;
+        const cy = (Y(p.j) + Y(p.j + 1)) / 2;
         ctx.beginPath();
-        ctx.arc(p.x + p.w / 2 - sx, p.y + p.h / 2 - sy, p.w / 2, 0, Math.PI * 2);
+        ctx.arc(cx, cy, p.size / 2, 0, Math.PI * 2);
         ctx.fill();
       } else {
-        ctx.fillRect(p.x - sx, p.y - sy, p.w, p.h);
+        // Reach in under the object wherever the block touches it.
+        const x0 = X(p.i) - (p.bleed.l ? BLEED : 0);
+        const y0 = Y(p.j) - (p.bleed.t ? BLEED : 0);
+        const x1 = X(p.i + p.w) + (p.bleed.r ? BLEED : 0);
+        const y1 = Y(p.j + p.h) + (p.bleed.b ? BLEED : 0);
+        ctx.fillRect(x0, y0, x1 - x0, y1 - y0);
       }
     }
     ctx.globalAlpha = 1;
@@ -110,21 +147,17 @@
   /* ----------------------------------------------------------------------
      The cluster, built on a grid aligned to the object's edges
      ---------------------------------------------------------------------- */
-  function burst(rect, color, origin) {
-    const L = rect.left + window.scrollX;
-    const T = rect.top + window.scrollY;
+  function burst(obj, color, origin) {
+    const rect = obj.getBoundingClientRect();
     const W = rect.width;
     const H = rect.height;
     const cell = clamp(Math.round(Math.min(W, H) / 2), CELL_MIN, CELL_MAX);
     const cols = Math.max(1, Math.round(W / cell));
     const rows = Math.max(1, Math.round(H / cell));
-    const ox = origin ? origin.x : L + W / 2;
-    const oy = origin ? origin.y : T + H / 2;
-
-    // Cell index to page position. Cells across the object are stretched
-    // slightly so the grid meets both of its edges exactly.
-    const X = (i) => Math.round(i < 0 ? L + i * cell : i <= cols ? L + (i * W) / cols : L + W + (i - cols) * cell);
-    const Y = (j) => Math.round(j < 0 ? T + j * cell : j <= rows ? T + (j * H) / rows : T + H + (j - rows) * cell);
+    const g = { obj, cell, cols, rows };
+    const { X, Y } = gridOf(rect, g);
+    const ox = origin ? origin.x : rect.left + W / 2;
+    const oy = origin ? origin.y : rect.top + H / 2;
 
     const taken = new Set();
     const key = (i, j) => `${i},${j}`;
@@ -144,10 +177,10 @@
 
     const start = performance.now();
     let order = 0;
-    const add = (r, dot) => {
+    const add = (shape, dot) => {
       const born = start + order++ * STEP_MS + (dot ? 60 : 0);
       const fade = start + rand(900, 1150);
-      pieces.push({ ...r, dot, color, born, fade, dead: fade + rand(450, 600) });
+      pieces.push({ g, ...shape, dot, color, born, fade, dead: fade + rand(450, 600) });
     };
 
     // Blocks: each covers a cell touching the object, near the hover point,
@@ -165,18 +198,16 @@
       if (cells.some(([i, j]) => !isFree(i, j) || depth(i, j) < 1 || depth(i, j) > MAX_DEPTH)) continue;
       cells.forEach(([i, j]) => taken.add(key(i, j)));
 
-      let x0 = X(i0);
-      let y0 = Y(j0);
-      let x1 = X(i0 + bw);
-      let y1 = Y(j0 + bh);
-      // Reach in under the object wherever the block touches it.
+      // Which sides touch the object (those reach in under it when drawn).
       const spansCols = i0 < cols && i0 + bw > 0;
       const spansRows = j0 < rows && j0 + bh > 0;
-      if (spansCols && j0 + bh === 0) y1 += BLEED;
-      if (spansCols && j0 === rows) y0 -= BLEED;
-      if (spansRows && i0 + bw === 0) x1 += BLEED;
-      if (spansRows && i0 === cols) x0 -= BLEED;
-      add({ x: x0, y: y0, w: x1 - x0, h: y1 - y0 }, false);
+      const bleed = {
+        b: spansCols && j0 + bh === 0,
+        t: spansCols && j0 === rows,
+        r: spansRows && i0 + bw === 0,
+        l: spansRows && i0 === cols,
+      };
+      add({ i: i0, j: j0, w: bw, h: bh, bleed }, false);
       n++;
     }
 
@@ -193,9 +224,7 @@
     const near = nearest(around, clamp(dots * 3, 9, 21));
     for (let n = 0; n < dots && near.length; n++) {
       const [i, j] = near.splice(Math.floor(Math.random() * near.length), 1)[0];
-      const cx = (X(i) + X(i + 1)) / 2;
-      const cy = (Y(j) + Y(j + 1)) / 2;
-      add({ x: Math.round(cx - size / 2), y: Math.round(cy - size / 2), w: size, h: size }, true);
+      add({ i, j, size }, true);
     }
 
     if (!frame) frame = requestAnimationFrame(draw);
@@ -225,8 +254,15 @@
     return out.startsWith('#') && out !== probe ? out : null;
   }
 
+  // While its cubes are up the object carries .cube-live, until they start
+  // to fade (the earliest fade is at 900 ms). Outlined cards stay filled
+  // through it (css/styles.css), so the cubes never hang off a bare outline.
+  const liveTimers = new WeakMap();
   function play(obj, origin) {
-    burst(obj.getBoundingClientRect(), burstColor(obj), origin);
+    burst(obj, burstColor(obj), origin);
+    clearTimeout(liveTimers.get(obj));
+    obj.classList.add('cube-live');
+    liveTimers.set(obj, setTimeout(() => obj.classList.remove('cube-live'), 900));
   }
 
   /* ----------------------------------------------------------------------
@@ -238,8 +274,7 @@
 
   const objectOf = (node) => {
     const hit = node instanceof Element ? node.closest(HOVER) : null;
-    if (!hit) return null;
-    return hit.closest(OBJECT) || hit;
+    return hit && !hit.closest(NO_CUBES) ? hit : null;
   };
 
   function trigger(obj, origin) {
@@ -256,7 +291,7 @@
     const obj = objectOf(e.target);
     if (!obj || armed.has(obj)) return;
     const r = obj.getBoundingClientRect();
-    if (trigger(obj, { x: e.pageX, y: e.pageY })) {
+    if (trigger(obj, { x: e.clientX, y: e.clientY })) {
       armed.set(obj, {
         l: r.left + window.scrollX,
         t: r.top + window.scrollY,

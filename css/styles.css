@@ -28,7 +28,7 @@
   /* Background grain strength. Plain blending, because overlay and soft-light
      leave fully saturated channels untouched, so the grain vanished on the
      brand colours. The dark theme needs less (see .theme-dark). */
-  --noise-opacity: 0.14;
+  --noise-opacity: 0.24;
   --noise-img: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
 }
 
@@ -113,7 +113,7 @@ img {
   color: var(--c-ink);
   min-height: 100vh;
 }
-.theme-dark { --bg: var(--c-night); color: var(--c-light); --noise-opacity: 0.07; }
+.theme-dark { --bg: var(--c-night); color: var(--c-light); --noise-opacity: 0.13; }
 .theme-red { --bg: var(--c-red); }
 .theme-orange { --bg: var(--c-orange); }
 .theme-blue { --bg: var(--c-blue); }
@@ -168,6 +168,20 @@ body::before {
 .nav__home {
   display: flex;
   justify-content: center;
+}
+
+/* Logos tilt on hover (they skip the hover cubes). No scale, no bounce. */
+.nav__home img,
+.footer__logo img {
+  transition: transform 0.25s ease-out;
+}
+.nav__home:hover img,
+.nav__home:focus-visible img {
+  transform: rotate(-8deg);
+}
+.footer__logo:hover img,
+.footer__logo:focus-visible img {
+  transform: rotate(-2deg);
 }
 
 /* Block nav, used on every page. On inner pages the current page's block
@@ -387,10 +401,6 @@ body::before {
   min-height: 150px;
   padding: calc(14 * var(--u)) calc(14 * var(--u)) calc(10 * var(--u));
   border: 3px solid var(--accent);
-  transition: background-color 0.2s ease;
-}
-.hero-card:hover {
-  background: color-mix(in srgb, var(--accent) 14%, transparent);
 }
 .hero-card__label {
   font-family: var(--f-mono);
@@ -415,7 +425,53 @@ body::before {
 .hero__social a {
   display: flex;
 }
-.hero__social .icon-email { width: 1.1em; }
+
+/* Social icons: on hover the icon turns a brand colour (they skip the hover
+   cubes). A mask of the same SVG, painted in the colour, fades in over the
+   image, so the colour is the exact brand hex. The masks are the icon files
+   (images/icons/) embedded as data URIs: Chrome blocks masks loaded from
+   file:// paths, which made the icon vanish when the site is opened locally.
+   If an icon file changes, re-embed it here. */
+.hero__social a,
+.ticket__ig {
+  position: relative;
+}
+.hero__social a[href*="instagram"],
+.ticket__ig {
+  --icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect x='3' y='3' width='18' height='18' rx='5'/%3E%3Ccircle cx='12' cy='12' r='4'/%3E%3Ccircle cx='17.25' cy='6.75' r='0.25' fill='%23000' stroke-width='1.5'/%3E%3C/svg%3E");
+  --icon-hover: var(--c-red);
+}
+.hero__social a[href^="mailto"] {
+  --icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect x='3' y='5' width='18' height='14' rx='3'/%3E%3Cpath d='M4 7l8 6 8-6'/%3E%3C/svg%3E");
+  --icon-hover: var(--c-green);
+}
+.hero__social a::after,
+.ticket__ig::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: var(--icon-hover);
+  -webkit-mask: var(--icon) center / contain no-repeat;
+  mask: var(--icon) center / contain no-repeat;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+.hero__social a img,
+.ticket__ig img {
+  transition: opacity 0.2s ease;
+}
+.hero__social a:hover::after,
+.hero__social a:focus-visible::after,
+.ticket__ig:hover::after,
+.ticket__ig:focus-visible::after {
+  opacity: 1;
+}
+.hero__social a:hover img,
+.hero__social a:focus-visible img,
+.ticket__ig:hover img,
+.ticket__ig:focus-visible img {
+  opacity: 0;
+}
 
 /* Recent happenings */
 .happenings {
@@ -447,6 +503,26 @@ body::before {
   min-height: 240px;
   object-fit: cover;
   transition: filter 0.3s ease;
+}
+/* Outlined cards (hero cards + happenings): on hover or keyboard focus they
+   fill with their outline colour and the text turns black. Their own border
+   stays as it is. The fill also holds while the card's hover cubes are up
+   (.cube-live, set by js/cubes.js), so the cubes always attach to a filled
+   card, never to a bare outline. The fill comes in instantly, with the
+   cubes, and fades out over 0.5 s, in step with them. */
+.hero-card,
+.happening {
+  transition: background-color 0.5s linear, color 0.5s linear;
+}
+.hero-card:hover,
+.hero-card:focus-visible,
+.hero-card.cube-live,
+.happening:hover,
+.happening:focus-visible,
+.happening.cube-live {
+  background: var(--accent);
+  color: var(--c-ink);
+  transition-duration: 0s;
 }
 .happening:hover .happening__img {
   filter: saturate(1.4) brightness(1.1);
