@@ -1,0 +1,1010 @@
+/* ==========================================================================
+   Dismantle Collective — styles for all five pages
+   Built against 1440px-wide desktop drafts. `--u` is one design pixel:
+   1px at ≥1440px, shrinking proportionally below that (never under 0.55px).
+   ========================================================================== */
+
+:root {
+  --u: clamp(0.55px, calc(100vw / 1440), 1px);
+
+  --c-ink: #000;
+  --c-night: #101010;
+  --c-red: #ff5755;
+  --c-orange: #ff4900;
+  --c-blue: #00a1ff;
+  --c-green: #00c379;
+  --c-cream: #f6eddb;
+  --c-grey: #efeeee;
+  --c-light: #e3e3e3;
+
+  --f-display: 'Red Hat Display', system-ui, sans-serif;
+  --f-raleway: 'Raleway', system-ui, sans-serif;
+  --f-body: 'Inter', system-ui, sans-serif;
+  --f-mono: 'Noto Sans Mono', ui-monospace, 'SFMono-Regular', Menlo, monospace;
+
+  --gutter: max(16px, calc(30 * var(--u)));
+  --gap: max(14px, calc(30 * var(--u)));
+
+  /* Background grain strength. Plain blending, because overlay and soft-light
+     leave fully saturated channels untouched, so the grain vanished on the
+     brand colours. The dark theme needs less (see .theme-dark). */
+  --noise-opacity: 0.24;
+  --noise-img: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  margin: 0;
+  background: var(--c-night);
+  color: var(--c-ink);
+  font-family: var(--f-body);
+  -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
+}
+
+h1,
+h2,
+h3,
+p,
+ul,
+figure {
+  margin: 0;
+  padding: 0;
+}
+
+ul {
+  list-style: none;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+img {
+  display: block;
+  max-width: 100%;
+}
+
+:focus-visible {
+  outline: 3px solid currentColor;
+  outline-offset: 3px;
+}
+
+.happenings, .hero-card__title {
+  font-variant-numeric: lining-nums;
+}
+
+/* Accent helpers ---------------------------------------------------------- */
+.accent-red { --accent: var(--c-red); }
+.accent-orange { --accent: var(--c-orange); }
+.accent-blue { --accent: var(--c-blue); }
+.accent-green { --accent: var(--c-green); }
+
+/* Logos + icons (black SVGs; .on-dark turns them light grey) -------------- */
+.logo-full { width: 100%; height: auto; aspect-ratio: 900 / 600; }
+.logo-type { width: 100%; height: auto; aspect-ratio: 900 / 300; }
+.logo-mark { width: max(64px, calc(100 * var(--u))); height: auto; aspect-ratio: 1; }
+.icon { width: 1em; height: 1em; }
+.on-dark { filter: invert(0.89); }
+
+/* Small ↗ arrow (inline SVG) */
+.arrow {
+  width: 16px;
+  height: 16px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.6;
+}
+
+/* Page themes ------------------------------------------------------------- */
+.page {
+  --bg: var(--c-night);
+  background: var(--bg);
+  color: var(--c-ink);
+  min-height: 100vh;
+}
+.theme-dark { --bg: var(--c-night); color: var(--c-light); --noise-opacity: 0.13; }
+.theme-red { --bg: var(--c-red); }
+.theme-orange { --bg: var(--c-orange); }
+.theme-blue { --bg: var(--c-blue); }
+.theme-green { --bg: var(--c-green); }
+
+/* Grain behind all page content (sections with their own fill cover it).
+   Static on purpose: moving grain would compete with the hover debris. */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background: var(--noise-img) 0 0 / 180px 180px;
+  opacity: var(--noise-opacity);
+}
+
+/* ==========================================================================
+   Cube interactions (js/cubes.js)
+   ========================================================================== */
+/* Debris layer: behind all content, so it shows on the page background and
+   passes under buttons, cards and text. It is added at the end of <body>, so
+   it still paints above the grain (body::before), which shares this z-index. */
+.cube-fx {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+
+/* ==========================================================================
+   Nav
+   ========================================================================== */
+.nav__inner {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  height: max(84px, calc(124 * var(--u)));
+  padding: 0 var(--gutter);
+}
+
+.nav__group {
+  display: flex;
+  gap: calc(30 * var(--u));
+}
+.nav__group--right {
+  justify-content: flex-end;
+}
+
+.nav__home {
+  display: flex;
+  justify-content: center;
+}
+
+/* Logos tilt on hover (they skip the hover cubes). No scale, no bounce. */
+.nav__home img,
+.footer__logo img {
+  transition: transform 0.25s ease-out;
+}
+.nav__home:hover img,
+.nav__home:focus-visible img {
+  transform: rotate(-8deg);
+}
+.footer__logo:hover img,
+.footer__logo:focus-visible img {
+  transform: rotate(-2deg);
+}
+
+/* Block nav, used on every page. On inner pages the current page's block
+   matches the page colour and blends in (chosen on purpose). */
+.nav--blocks .nav__link {
+  display: flex;
+  align-items: center;
+  width: max(86px, calc(146 * var(--u)));
+  height: max(24px, calc(30 * var(--u)));
+  padding: 0 calc(6 * var(--u));
+  background: var(--accent);
+  color: var(--c-ink);
+  font-family: var(--f-mono);
+  font-size: max(12px, calc(18 * var(--u)));
+  text-transform: uppercase;
+}
+.nav--blocks .nav__link--red { --accent: var(--c-red); }
+.nav--blocks .nav__link--blue { --accent: var(--c-blue); }
+.nav--blocks .nav__link--orange { --accent: var(--c-orange); }
+.nav--blocks .nav__link--green { --accent: var(--c-green); }
+.nav--blocks .nav__link--end {
+  justify-content: flex-end;
+  padding-right: calc(12 * var(--u));
+}
+
+/* ==========================================================================
+   Shared page pieces
+   ========================================================================== */
+.page-title {
+  padding: calc(126 * var(--u)) var(--gutter) 0 calc(40 * var(--u));
+  margin-bottom: calc(46 * var(--u));
+  font-family: var(--f-display);
+  font-weight: 500;
+  font-size: max(34px, calc(70 * var(--u)));
+  line-height: 1.12;
+  letter-spacing: -0.06em;
+}
+.page-title--center {
+  padding-left: var(--gutter);
+  text-align: center;
+  letter-spacing: -0.05em;
+}
+
+/* Card grid (artists + shop) */
+.card-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: calc(24 * var(--u)) var(--gap);
+  padding: 0 var(--gutter);
+}
+.card-grid--shop {
+  row-gap: calc(40 * var(--u));
+  padding-bottom: calc(122 * var(--u));
+}
+
+.card {
+  scroll-margin-top: 24px;
+}
+.card__media {
+  aspect-ratio: 440 / 400;
+  overflow: hidden;
+  background: var(--c-cream);
+}
+.card__media img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.4s ease;
+}
+.card:hover .card__media img {
+  transform: scale(1.04);
+}
+.card__title {
+  margin-top: calc(14 * var(--u));
+  font-family: var(--f-display);
+  font-weight: 500;
+  font-size: max(22px, calc(34 * var(--u)));
+  line-height: 1;
+  letter-spacing: -0.05em;
+}
+.card__title--lg {
+  margin-top: calc(10 * var(--u));
+  font-size: max(30px, calc(68 * var(--u)));
+  letter-spacing: -0.065em;
+}
+.card__meta {
+  margin-top: calc(2 * var(--u));
+  font-family: var(--f-display);
+  font-size: max(13px, calc(18 * var(--u)));
+  letter-spacing: -0.02em;
+}
+.card__meta--price {
+  margin-top: calc(6 * var(--u));
+  font-family: var(--f-body);
+  letter-spacing: 0;
+}
+
+/* Contact block */
+.contact {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  aspect-ratio: 1380 / 862;
+  margin: calc(126 * var(--u)) var(--gutter) calc(64 * var(--u));
+  background-image: url('../images/swirl.webp');
+  background-size: cover;
+  background-position: center;
+  color: var(--c-ink);
+}
+.contact__link {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-top: calc(-30 * var(--u));
+  padding: 16px;
+  text-align: center;
+}
+.contact__icon {
+  font-size: max(40px, calc(72 * var(--u)));
+  margin-bottom: calc(52 * var(--u));
+}
+.contact__title {
+  font-family: var(--f-display);
+  font-weight: 500;
+  font-size: max(30px, calc(66 * var(--u)));
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+}
+.contact__email {
+  font-family: var(--f-display);
+  font-size: max(16px, calc(44 * var(--u)));
+  letter-spacing: -0.02em;
+  overflow-wrap: anywhere;
+}
+.contact__link:hover .contact__email {
+  text-decoration: underline;
+  text-decoration-thickness: 2px;
+  text-underline-offset: 6px;
+}
+
+/* Footer */
+.footer {
+  padding: calc(28 * var(--u)) var(--gutter) calc(92 * var(--u));
+  color: var(--c-ink);
+}
+.footer--grey { background: var(--c-grey); }
+.footer--cream { background: var(--c-cream); }
+
+.footer__logo {
+  display: block;
+}
+.footer__links {
+  display: flex;
+  justify-content: center;
+  gap: calc(383 * var(--u));
+  margin-top: calc(42 * var(--u));
+}
+.footer__col {
+  font-size: max(17px, calc(32 * var(--u)));
+  line-height: 1.43;
+}
+.footer__col--site {
+  text-align: right;
+}
+.footer__col a:hover {
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}
+.footer__copy {
+  margin-top: calc(73 * var(--u));
+  text-align: center;
+  font-family: var(--f-display);
+  font-size: max(12px, calc(18 * var(--u)));
+  letter-spacing: -0.01em;
+}
+
+/* Corner tabs (hero cards + happenings) */
+.corner {
+  position: absolute;
+  top: 0;
+  right: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--accent);
+  color: var(--c-ink);
+}
+.corner--sm { width: calc(30 * var(--u)); height: calc(30 * var(--u)); min-width: 22px; min-height: 22px; }
+.corner--lg { width: calc(75 * var(--u)); height: calc(75 * var(--u)); }
+.corner .arrow { width: 60%; height: 60%; }
+
+/* ==========================================================================
+   Home
+   ========================================================================== */
+.hero {
+  padding: calc(124 * var(--u)) var(--gutter) 0;
+}
+.hero__logo {
+  width: calc(560 * var(--u));
+  min-width: 260px;
+  margin: 0 auto;
+  line-height: 0;
+}
+.hero__row {
+  display: grid;
+  grid-template-columns: calc(296 * var(--u)) 1fr calc(296 * var(--u));
+  align-items: end;
+  margin-top: calc(53 * var(--u));
+}
+
+.hero-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  height: calc(202 * var(--u));
+  min-height: 150px;
+  padding: calc(14 * var(--u)) calc(14 * var(--u)) calc(10 * var(--u));
+  border: 3px solid var(--accent);
+}
+.hero-card__label {
+  font-family: var(--f-mono);
+  font-size: max(11px, calc(18 * var(--u)));
+  text-transform: uppercase;
+  padding-right: 30px;
+}
+.hero-card__title {
+  font-family: var(--f-raleway);
+  font-weight: 500;
+  font-size: max(20px, calc(34 * var(--u)));
+  line-height: 0.95;
+}
+
+.hero__social {
+  display: flex;
+  justify-content: center;
+  gap: calc(57 * var(--u));
+  padding-bottom: calc(4 * var(--u));
+  font-size: max(36px, calc(50 * var(--u)));
+}
+.hero__social a {
+  display: flex;
+}
+
+/* Social icons: on hover the icon turns a brand colour (they skip the hover
+   cubes). A mask of the same SVG, painted in the colour, fades in over the
+   image, so the colour is the exact brand hex. The masks are the icon files
+   (images/icons/) embedded as data URIs: Chrome blocks masks loaded from
+   file:// paths, which made the icon vanish when the site is opened locally.
+   If an icon file changes, re-embed it here. */
+.hero__social a,
+.ticket__ig {
+  position: relative;
+}
+.hero__social a[href*="instagram"],
+.ticket__ig {
+  --icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect x='3' y='3' width='18' height='18' rx='5'/%3E%3Ccircle cx='12' cy='12' r='4'/%3E%3Ccircle cx='17.25' cy='6.75' r='0.25' fill='%23000' stroke-width='1.5'/%3E%3C/svg%3E");
+  --icon-hover: var(--c-red);
+}
+.hero__social a[href^="mailto"] {
+  --icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect x='3' y='5' width='18' height='14' rx='3'/%3E%3Cpath d='M4 7l8 6 8-6'/%3E%3C/svg%3E");
+  --icon-hover: var(--c-green);
+}
+.hero__social a::after,
+.ticket__ig::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: var(--icon-hover);
+  -webkit-mask: var(--icon) center / contain no-repeat;
+  mask: var(--icon) center / contain no-repeat;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+.hero__social a img,
+.ticket__ig img {
+  transition: opacity 0.2s ease;
+}
+.hero__social a:hover::after,
+.hero__social a:focus-visible::after,
+.ticket__ig:hover::after,
+.ticket__ig:focus-visible::after {
+  opacity: 1;
+}
+.hero__social a:hover img,
+.hero__social a:focus-visible img,
+.ticket__ig:hover img,
+.ticket__ig:focus-visible img {
+  opacity: 0;
+}
+
+/* Recent happenings */
+.happenings {
+  padding: calc(126 * var(--u)) var(--gutter) 0;
+}
+.happenings__title {
+  font-family: var(--f-raleway);
+  font-weight: 400;
+  font-size: max(30px, calc(66 * var(--u)));
+  line-height: 1;
+  letter-spacing: -0.03em;
+  margin-bottom: calc(27 * var(--u));
+}
+.happenings__grid {
+  display: grid;
+  grid-template-columns: 676fr 326fr 326fr;
+  gap: calc(28 * var(--u));
+}
+.happening {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  border: 3px solid var(--accent);
+  overflow: hidden;
+}
+.happening__img {
+  width: 100%;
+  height: calc(475 * var(--u));
+  min-height: 240px;
+  object-fit: cover;
+  transition: filter 0.3s ease;
+}
+/* Outlined cards (hero cards + happenings): on hover or keyboard focus they
+   fill with their outline colour and the text turns black. Their own border
+   stays as it is. The fill also holds while the card's hover cubes are up
+   (.cube-live, set by js/cubes.js), so the cubes always attach to a filled
+   card, never to a bare outline. The fill comes in instantly, with the
+   cubes, and fades out over 0.5 s, in step with them. */
+.hero-card,
+.happening {
+  transition: background-color 0.5s linear, color 0.5s linear;
+}
+.hero-card:hover,
+.hero-card:focus-visible,
+.hero-card.cube-live,
+.happening:hover,
+.happening:focus-visible,
+.happening.cube-live {
+  background: var(--accent);
+  color: var(--c-ink);
+  transition-duration: 0s;
+}
+.happening:hover .happening__img {
+  filter: saturate(1.4) brightness(1.1);
+}
+.happening .corner {
+  transition: width 0.25s ease, height 0.25s ease;
+}
+.happening:hover .corner {
+  width: calc(95 * var(--u));
+  height: calc(95 * var(--u));
+}
+.happening__title {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  flex: 1;
+  min-height: calc(146 * var(--u));
+  padding: calc(16 * var(--u)) calc(20 * var(--u)) calc(30 * var(--u));
+  font-family: var(--f-raleway);
+  font-weight: 400;
+  font-size: max(22px, calc(48 * var(--u)));
+  line-height: 1;
+  letter-spacing: -0.02em;
+}
+
+/* Representing
+   Each artist has one of the four brand colours, cycling down the list
+   (--rep). The active artist's colour is copied to the section as
+   --rep-accent by js/main.js, and paints the portrait border and pixels. */
+.representing {
+  --rep-accent: var(--c-blue);
+  padding: calc(203 * var(--u)) 0 calc(110 * var(--u));
+}
+.representing__list li:nth-child(4n + 1) .representing__name { --rep: var(--c-red); }
+.representing__list li:nth-child(4n + 2) .representing__name { --rep: var(--c-blue); }
+.representing__list li:nth-child(4n + 3) .representing__name { --rep: var(--c-orange); }
+.representing__list li:nth-child(4n + 4) .representing__name { --rep: var(--c-green); }
+.representing__title {
+  padding-right: calc(104 * var(--u));
+  text-align: center;
+  font-family: var(--f-display);
+  font-weight: 300;
+  font-size: max(30px, calc(64 * var(--u)));
+  letter-spacing: -0.02em;
+  margin-bottom: calc(39 * var(--u));
+}
+.representing__body {
+  display: grid;
+  grid-template-columns: calc(702 * var(--u)) calc(509 * var(--u));
+  column-gap: calc(33 * var(--u));
+  max-width: 1440px;
+  margin: 0 auto;
+}
+.representing__list {
+  text-align: right;
+  overflow: visible;
+}
+.representing__name {
+  position: relative;
+  display: inline-block;
+  font-family: var(--f-display);
+  font-size: max(30px, calc(64 * var(--u)));
+  line-height: calc(85 * var(--u));
+  letter-spacing: 0;
+  transition: color 0.15s ease;
+  --burst: var(--rep); /* hover debris in the artist's colour */
+}
+.representing__name::before {
+  content: '';
+  position: absolute;
+  z-index: -1;
+  top: 50%;
+  right: calc(-92 * var(--u));
+  width: calc(613 * var(--u));
+  height: calc(90 * var(--u));
+  transform: translateY(-50%) scaleX(0);
+  transform-origin: right;
+  background: var(--rep);
+  transition: transform 0.2s ease;
+}
+.representing__name.is-active {
+  color: var(--c-ink);
+}
+.representing__name.is-active::before {
+  transform: translateY(-50%) scaleX(1);
+}
+.representing__list li {
+  position: relative;
+  isolation: isolate;
+}
+
+.representing__art {
+  position: relative;
+  align-self: start;
+  margin-top: calc(135 * var(--u));
+  width: calc(509 * var(--u));
+  aspect-ratio: 509 / 709;
+  z-index: 1;
+}
+.representing__art img {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border: calc(5 * var(--u)) solid var(--rep-accent);
+  background: var(--c-cream);
+}
+/* Glitchy pixel "shadow" behind the artwork. On each artist change js/main.js
+   hides them (.is-off) and pops them back one by one, like the hover cubes. */
+.px {
+  position: absolute;
+  background: var(--rep-accent);
+}
+.px.is-off {
+  visibility: hidden;
+}
+.px--a { left: calc(508 * var(--u)); top: calc(52 * var(--u)); width: calc(40 * var(--u)); height: calc(232 * var(--u)); }
+.px--b { left: calc(508 * var(--u)); top: calc(440 * var(--u)); width: calc(40 * var(--u)); height: calc(219 * var(--u)); }
+.px--c { left: calc(508 * var(--u)); top: calc(659 * var(--u)); width: calc(85 * var(--u)); height: calc(65 * var(--u)); }
+.px--d { left: calc(458 * var(--u)); top: calc(704 * var(--u)); width: calc(90 * var(--u)); height: calc(45 * var(--u)); }
+.px--e { left: calc(33 * var(--u)); top: calc(704 * var(--u)); width: calc(282 * var(--u)); height: calc(45 * var(--u)); }
+.px--f { left: calc(134 * var(--u)); top: calc(744 * var(--u)); width: calc(151 * var(--u)); height: calc(35 * var(--u)); }
+
+/* Home events */
+.home-events {
+  display: grid;
+  gap: calc(25 * var(--u));
+  padding: 0 var(--gutter) calc(68 * var(--u));
+}
+.home-events__row {
+  display: grid;
+  grid-template-columns: 499fr 499fr 322fr;
+  gap: var(--gap);
+}
+
+.schedule-card {
+  position: relative;
+  display: flex;
+  align-items: flex-end;
+  min-height: calc(357 * var(--u));
+  padding: calc(22 * var(--u));
+  border-radius: calc(20 * var(--u));
+  background: var(--c-red);
+  color: var(--c-ink);
+}
+.schedule-card__title {
+  font-family: var(--f-display);
+  font-weight: 600;
+  font-size: max(22px, calc(32 * var(--u)));
+  line-height: 0.95;
+}
+.schedule-card__arrow {
+  position: absolute;
+  top: calc(18 * var(--u));
+  right: calc(18 * var(--u));
+}
+
+/* ==========================================================================
+   Ticket
+   ========================================================================== */
+.ticket {
+  --stub: calc(313 * var(--u));
+  --notch: max(18px, calc(50 * var(--u)));
+  --radius: max(12px, calc(20 * var(--u)));
+  position: relative;
+  display: grid;
+  grid-template-columns: 1fr var(--stub);
+  min-height: calc(357 * var(--u));
+  border-radius: var(--radius);
+  overflow: hidden;
+  color: var(--c-ink);
+  background: var(--accent);
+}
+.ticket--compact {
+  --stub: calc(172 * var(--u));
+}
+
+.ticket__main {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: calc(26 * var(--u)) calc(28 * var(--u)) calc(26 * var(--u));
+  background-size: cover;
+  background-position: center;
+  isolation: isolate;
+}
+/* colour wash over the photo */
+.ticket__main::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background: var(--accent);
+  opacity: 0.74;
+  transition: opacity 0.3s ease;
+}
+.ticket:hover .ticket__main::before {
+  opacity: 0.6;
+}
+
+.ticket__date {
+  font-size: max(12px, calc(18 * var(--u)));
+}
+.ticket__title {
+  display: flex;
+  flex-direction: column;
+  font-family: var(--f-display);
+  font-weight: 600;
+  font-size: max(26px, calc(66 * var(--u)));
+  line-height: 0.94;
+  letter-spacing: -0.005em;
+  margin-top: 24px;
+}
+.ticket--compact .ticket__title {
+  font-size: max(20px, calc(32 * var(--u)));
+}
+.ticket__lineup {
+  position: absolute;
+  right: calc(110 * var(--u));
+  bottom: calc(26 * var(--u));
+  font-family: var(--f-display);
+  font-size: max(11px, calc(18 * var(--u)));
+  letter-spacing: 0.01em;
+}
+
+.ticket__stub {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: calc(34 * var(--u)) calc(30 * var(--u)) calc(26 * var(--u));
+  border-left: 2px dotted var(--c-ink);
+}
+.ticket__cta {
+  font-size: max(18px, calc(32 * var(--u)));
+  line-height: 1.2;
+}
+.ticket__cta::after {
+  /* make the whole stub clickable */
+  content: '';
+  position: absolute;
+  inset: 0;
+}
+.ticket__cta:hover {
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}
+.ticket__arrow {
+  position: absolute;
+  top: calc(18 * var(--u));
+  right: calc(18 * var(--u));
+}
+.ticket__ig {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-self: flex-start;
+  font-size: max(30px, calc(50 * var(--u)));
+}
+
+.ticket__notch {
+  position: absolute;
+  right: calc(var(--stub) - var(--notch) / 2);
+  width: var(--notch);
+  height: var(--notch);
+  border-radius: 50%;
+  background: var(--bg);
+}
+/* Same grain as the page, so the notch reads as a hole, not a flat dot */
+.ticket__notch::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: var(--noise-img) 0 0 / 180px 180px;
+  opacity: var(--noise-opacity);
+}
+.ticket__notch--top { top: calc(var(--notch) / -2); }
+.ticket__notch--bottom { bottom: calc(var(--notch) / -2); }
+
+/* Dark variant (schedule page) */
+.ticket--dark {
+  background: var(--c-ink);
+  color: #f2f2f2;
+}
+.ticket--dark .ticket__main::before {
+  background: var(--c-ink);
+  opacity: 0.72;
+}
+.ticket--dark .ticket__arrow {
+  display: none;
+}
+.ticket--dark .ticket__stub {
+  border-left-color: #1d1d1d;
+}
+.ticket--dark .ticket__title {
+  font-weight: 500;
+  letter-spacing: 0.01em;
+}
+
+/* ==========================================================================
+   About
+   ========================================================================== */
+.about__logo {
+  width: calc(908 * var(--u));
+  min-width: 300px;
+  max-width: 100%;
+  margin: calc(-6 * var(--u)) auto 0;
+  line-height: 0;
+}
+.about__copy {
+  max-width: calc(1020 * var(--u));
+  margin: calc(86 * var(--u)) auto 0;
+  padding: 0 var(--gutter);
+  text-align: center;
+  font-family: var(--f-display);
+  font-weight: 500;
+  font-size: max(20px, calc(48 * var(--u)));
+  line-height: 1;
+  letter-spacing: -0.015em;
+}
+.about__copy p + p {
+  margin-top: 1em;
+}
+
+/* ==========================================================================
+   Schedule
+   ========================================================================== */
+.theme-green .page-title {
+  margin-bottom: calc(38 * var(--u));
+}
+.schedule-list {
+  display: grid;
+  gap: calc(25 * var(--u));
+  padding: 0 var(--gutter);
+}
+.theme-green .contact {
+  margin-top: calc(60 * var(--u));
+}
+
+/* ==========================================================================
+   Responsive
+   ========================================================================== */
+@media (max-width: 900px) {
+  .card-grid {
+    grid-template-columns: repeat(2, 1fr);
+    row-gap: 32px;
+  }
+  .happenings__grid {
+    grid-template-columns: 1fr 1fr;
+  }
+  .happening:first-child {
+    grid-column: 1 / -1;
+  }
+  .home-events__row {
+    grid-template-columns: 1fr 1fr;
+  }
+  .schedule-card {
+    grid-column: 1 / -1;
+    min-height: 140px;
+  }
+  .ticket--compact {
+    --stub: 120px;
+  }
+  .ticket {
+    min-height: 220px;
+  }
+}
+
+@media (max-width: 760px) {
+  .nav__inner {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    height: auto;
+    padding-top: 14px;
+    padding-bottom: 14px;
+    row-gap: 10px;
+  }
+  .nav__home {
+    order: -1;
+    flex: 0 0 100%;
+  }
+  .nav__group {
+    gap: 8px;
+  }
+  .nav--blocks .nav__link {
+    width: auto;
+    padding: 0 8px;
+  }
+
+  .hero__row {
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+  }
+  .hero__social {
+    grid-column: 1 / -1;
+    grid-row: 2;
+    padding-top: 12px;
+  }
+
+  .representing__body {
+    grid-template-columns: 1fr;
+    padding: 0 var(--gutter);
+  }
+  .representing__title {
+    padding-right: 0;
+  }
+  .representing__list {
+    text-align: center;
+  }
+  .representing__name {
+    line-height: 1.35;
+  }
+  .representing__name::before {
+    left: 50%;
+    right: auto;
+    width: 100vw;
+    height: 100%;
+    transform: translate(-50%, -50%) scaleX(0);
+    transform-origin: center;
+  }
+  .representing__name.is-active::before {
+    transform: translate(-50%, -50%) scaleX(1);
+  }
+  .representing__art {
+    width: min(78%, 360px);
+    margin: 40px auto 30px;
+    justify-self: center;
+  }
+  .px--a, .px--b, .px--c { left: calc(100% - 1px); }
+  .px--a, .px--b { width: 6%; }
+
+  .footer__links {
+    gap: 40px;
+  }
+  .contact {
+    aspect-ratio: 4 / 5;
+  }
+}
+
+@media (max-width: 560px) {
+  .card-grid {
+    grid-template-columns: 1fr;
+  }
+  .happenings__grid {
+    grid-template-columns: 1fr;
+  }
+  .home-events__row {
+    grid-template-columns: 1fr;
+  }
+  .ticket {
+    --stub: 108px;
+    min-height: 200px;
+  }
+  .ticket--compact {
+    --stub: 108px;
+  }
+  .ticket__lineup {
+    position: static;
+    margin-top: 8px;
+  }
+  .hero__row {
+    grid-template-columns: 1fr;
+  }
+  .hero__social {
+    grid-row: auto;
+  }
+  .hero-card {
+    min-height: 130px;
+  }
+  .footer__links {
+    gap: 28px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    transition: none !important;
+    animation: none !important;
+  }
+}
